@@ -1,0 +1,183 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import Link from "next/link";
+
+type CompanyResult = {
+  id: string;
+  properties: {
+    name?: string;
+    domain?: string;
+    website?: string;
+    industry?: string;
+    annualrevenue?: string;
+    lifecyclestage?: string;
+  };
+};
+
+type ContactResult = {
+  id: string;
+  properties: {
+    firstname?: string;
+    lastname?: string;
+    email?: string;
+    jobtitle?: string;
+    phone?: string;
+    company?: string;
+  };
+};
+
+export default function CRMPage() {
+  const [query, setQuery] = useState("");
+  const [companies, setCompanies] = useState<CompanyResult[]>([]);
+  const [contacts, setContacts] = useState<ContactResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const search = useCallback(() => {
+    const q = query.trim();
+    if (!q) {
+      setCompanies([]);
+      setContacts([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const isDomain = /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(q) && !/\s/.test(q);
+    Promise.all([
+      fetch("/api/hubspot/companies/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(isDomain ? { domain: q } : { q }),
+      }).then((r) => r.json()),
+      fetch("/api/hubspot/contacts/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q }),
+      }).then((r) => r.json()),
+    ])
+      .then(([companyData, contactData]) => {
+        if (companyData.error) throw new Error(companyData.error);
+        if (contactData.error) throw new Error(contactData.error);
+        setCompanies(companyData.results ?? []);
+        setContacts(contactData.results ?? []);
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [query]);
+
+  const debouncedSearch = useCallback(() => {
+    const t = setTimeout(search, 350);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  return (
+    <main className="p-4 min-h-screen">
+      <h1 className="text-xl font-bold mt-2">CRM</h1>
+      <p className="text-zinc-400 text-sm mt-1">
+        Search HubSpot by company or contact name.
+      </p>
+      <div className="mt-4 flex gap-2">
+        <input
+          type="search"
+          placeholder="Company or contact name..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && search()}
+          className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+        <button
+          type="button"
+          onClick={search}
+          className="bg-orange-500 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-orange-600"
+        >
+          Search
+        </button>
+      </div>
+      {error && (
+        <p className="mt-3 text-red-400 text-sm">
+          {error}. <Link href="/conventions" className="text-orange-500 underline">Check directory</Link> instead.
+        </p>
+      )}
+      {loading && <p className="mt-3 text-zinc-500 text-sm">Searching…</p>}
+      {!loading && (companies.length > 0 || contacts.length > 0) && (
+        <div className="mt-6 space-y-6">
+          {companies.length > 0 && (
+            <section>
+              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                Companies ({companies.length})
+              </h2>
+              <ul className="space-y-2">
+                {companies.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      href={`/crm/company/${c.id}`}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
+                        {(c.properties.name ?? "?").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">
+                          {c.properties.name ?? "—"}
+                        </div>
+                        <div className="text-zinc-400 text-sm truncate">
+                          {c.properties.domain ?? c.properties.industry ?? ""}
+                        </div>
+                      </div>
+                      <span className="text-zinc-500">›</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {contacts.length > 0 && (
+            <section>
+              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                Contacts ({contacts.length})
+              </h2>
+              <ul className="space-y-2">
+                {contacts.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      href={`/crm/contact/${c.id}`}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
+                        {[
+                          c.properties.firstname?.[0],
+                          c.properties.lastname?.[0],
+                        ]
+                          .filter(Boolean)
+                          .join("")
+                          .toUpperCase() || "?"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">
+                          {[c.properties.firstname, c.properties.lastname]
+                            .filter(Boolean)
+                            .join(" ") || "—"}
+                        </div>
+                        <div className="text-zinc-400 text-sm truncate">
+                          {c.properties.jobtitle ?? ""}
+                          {c.properties.company ? ` · ${c.properties.company}` : ""}
+                        </div>
+                      </div>
+                      <span className="text-zinc-500">›</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
+      {!loading && query.trim() && companies.length === 0 && contacts.length === 0 && !error && (
+        <p className="mt-6 text-zinc-500 text-center">
+          No results. <Link href="/conventions" className="text-orange-500 underline">Check directory</Link> for convention leads.
+        </p>
+      )}
+    </main>
+  );
+}
