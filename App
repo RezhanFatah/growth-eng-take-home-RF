@@ -1,1 +1,0 @@
-Umbrella directory for app structure
