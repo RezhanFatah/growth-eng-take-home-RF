@@ -73,25 +73,26 @@ export default function CRMPage() {
 
   return (
     <main className="p-4 min-h-screen">
-      <h1 className="text-xl font-bold mt-2">CRM</h1>
-      <p className="text-zinc-400 text-sm mt-1">
+      <h1 className="text-center text-lg font-medium text-zinc-200 mt-2">CRM</h1>
+      <p className="text-center text-zinc-400 text-sm mt-1">
         Search HubSpot by company or contact name.
       </p>
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex gap-2 items-center">
         <input
           type="search"
           placeholder="Company or contact name..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && search()}
-          className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="flex-1 bg-zinc-900/50 border-0 rounded-full px-5 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700"
         />
         <button
           type="button"
           onClick={search}
-          className="bg-orange-500 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-orange-600"
+          className="bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 transition-colors shrink-0"
+          aria-label="Search"
         >
-          Search
+          <img src="/icons/send.svg" alt="" className="w-5 h-5" aria-hidden />
         </button>
       </div>
       {error && (
@@ -104,7 +105,7 @@ export default function CRMPage() {
         <div className="mt-6 space-y-6">
           {companies.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
                 Companies ({companies.length})
               </h2>
               <ul className="space-y-2">
@@ -134,7 +135,7 @@ export default function CRMPage() {
           )}
           {contacts.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
                 Contacts ({contacts.length})
               </h2>
               <ul className="space-y-2">

@@ -7,6 +7,31 @@ import { useSearchParams } from "next/navigation";
 const RECENT_KEY = "chat-recent";
 const RECENT_MAX = 10;
 
+function getThreadKey(type: string, id: string, slug: string): string {
+  return type === "directory" ? `chat-thread-${type}-${id}-${slug}` : `chat-thread-${type}-${id}`;
+}
+
+function loadThreadMessages(type: string, id: string, slug: string): Message[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(getThreadKey(type, id, slug));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    const list = Array.isArray(parsed?.messages) ? parsed.messages : [];
+    return list.every((m: unknown) => m && typeof m === "object" && "role" in m && "content" in m)
+      ? list as Message[]
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveThreadMessages(type: string, id: string, slug: string, messages: Message[]) {
+  try {
+    localStorage.setItem(getThreadKey(type, id, slug), JSON.stringify({ messages }));
+  } catch {}
+}
+
 function addRecent(item: { id: string; type: string; name: string; snippet: string }) {
   const date = new Date().toISOString();
   let list: Array<{ id: string; type: string; name: string; snippet: string; date: string }> = [];
@@ -35,6 +60,8 @@ function ChatThreadContent() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const hasHydratedRef = useRef(false);
 
   useEffect(() => {
     if (!type || !id) {
@@ -52,14 +79,28 @@ function ChatThreadContent() {
       .then((data) => {
         setName(data.name ?? "Contact");
         setContext(data.context ?? "");
+        const stored = loadThreadMessages(type!, id!, slug);
+        if (stored.length > 0) setMessages(stored);
+        hasHydratedRef.current = true; // allow persist from now on
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [type, id, slug]);
 
   useEffect(() => {
+    if (type && id && hasHydratedRef.current) saveThreadMessages(type, id, slug, messages);
+  }, [type, id, slug, messages]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!loading && messages.length === 0) {
+      // Auto-focus input for new chats
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [loading, messages.length]);
 
   const send = useCallback(() => {
     const text = input.trim();
@@ -108,8 +149,8 @@ function ChatThreadContent() {
   }
 
   return (
-    <main className="p-4 flex flex-col min-h-[80vh]">
-      <div className="flex items-center gap-2 mb-4">
+    <main className="flex flex-col h-screen">
+      <div className="flex items-center gap-2 p-4 pb-2 shrink-0">
         <Link href="/chat" className="text-orange-500 hover:underline text-sm shrink-0">
           ← Chat
         </Link>
@@ -120,9 +161,9 @@ function ChatThreadContent() {
           <span className="font-semibold truncate">{name}</span>
         </div>
       </div>
-      <div className="flex-1 space-y-4 overflow-y-auto min-h-0">
+      <div className="flex-1 px-4 space-y-4 overflow-y-auto pb-4">
         {messages.length === 0 && (
-          <p className="text-zinc-500 text-sm">Ask anything about this contact or company. I’ll only use the data we have.</p>
+          <p className="text-zinc-500 text-sm">Ask anything about this contact or company. I can search the web for current info if needed.</p>
         )}
         {messages.map((msg, i) => (
           <div
@@ -149,22 +190,24 @@ function ChatThreadContent() {
         )}
         <div ref={bottomRef} />
       </div>
-      <div className="mt-4 flex gap-2">
+      <div className="px-4 pb-24 pt-2 flex gap-2 shrink-0 items-center bg-[var(--bg)]">
         <input
+          ref={inputRef}
           type="text"
           placeholder="Ask about this contact..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
-          className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="flex-1 bg-zinc-900/50 border-0 rounded-full px-5 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700"
         />
         <button
           type="button"
           onClick={send}
           disabled={sending || !input.trim()}
-          className="bg-orange-500 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-50"
+          className="bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 disabled:opacity-50 transition-colors shrink-0"
+          aria-label="Send message"
         >
-          Send
+          <img src="/icons/send.svg" alt="" className="w-5 h-5" aria-hidden />
         </button>
       </div>
     </main>

@@ -91,9 +91,9 @@ export default function ConventionDirectoryPage() {
       </div>
       {convention && (
         <>
-          <h1 className="text-xl font-bold mt-2">{convention.name}</h1>
+          <h1 className="text-center text-lg font-medium text-zinc-200 mt-2">{convention.name}</h1>
           {(convention.dates || convention.location) && (
-            <p className="text-zinc-400 text-sm mt-1">
+            <p className="text-center text-zinc-400 text-sm mt-1">
               {[convention.dates, convention.location].filter(Boolean).join(" · ")}
             </p>
           )}
@@ -105,7 +105,7 @@ export default function ConventionDirectoryPage() {
           placeholder="Search name, company, or location..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full bg-zinc-900/50 border-0 rounded-full px-5 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700"
         />
       </div>
       {loading && !convention ? (
@@ -115,7 +115,7 @@ export default function ConventionDirectoryPage() {
       ) : (
         <div className="mt-6 space-y-6">
           <section>
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
               Exhibitors ({exhibitors.length})
             </h2>
             <ul className="mt-2 space-y-2">
@@ -136,13 +136,12 @@ export default function ConventionDirectoryPage() {
                     </div>
                     {scoreBadge(e.score) && (
                       <span
-                        className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                          scoreBadge(e.score) === "A"
+                        className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${scoreBadge(e.score) === "A"
                             ? "bg-green-500/20 text-green-400"
                             : scoreBadge(e.score) === "B"
                               ? "bg-orange-500/20 text-orange-400"
                               : "bg-yellow-500/20 text-yellow-400"
-                        }`}
+                          }`}
                       >
                         {scoreBadge(e.score)}
                       </span>
@@ -159,7 +158,7 @@ export default function ConventionDirectoryPage() {
             )}
           </section>
           <section>
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
               Attendees ({attendees.length})
             </h2>
             <ul className="mt-2 space-y-2">

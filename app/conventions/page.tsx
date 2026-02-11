@@ -38,8 +38,8 @@ export default function ConventionsPage() {
   if (loading) {
     return (
       <main className="p-4 min-h-screen">
-        <h1 className="text-xl font-bold mt-2">Conventions</h1>
-        <p className="text-zinc-400 text-sm mt-1">
+        <h1 className="text-center text-lg font-medium text-zinc-200 mt-2">Conventions</h1>
+        <p className="text-center text-zinc-400 text-sm mt-1">
           Browse upcoming events and their contacts.
         </p>
         <div className="mt-8 text-zinc-500 text-center">Loading…</div>
@@ -50,7 +50,7 @@ export default function ConventionsPage() {
   if (error) {
     return (
       <main className="p-4 min-h-screen">
-        <h1 className="text-xl font-bold mt-2">Conventions</h1>
+        <h1 className="text-center text-lg font-medium text-zinc-200 mt-2">Conventions</h1>
         <p className="text-red-400 mt-4">{error}</p>
         <p className="text-zinc-500 text-sm mt-2">
           Ensure Sanity is configured (NEXT_PUBLIC_SANITY_PROJECT_ID, NEXT_PUBLIC_SANITY_DATASET) and at least one convention exists in Studio.
@@ -61,9 +61,9 @@ export default function ConventionsPage() {
 
   return (
     <main className="p-4 min-h-screen">
-      <h1 className="text-xl font-bold mt-2">Conventions</h1>
-      <p className="text-zinc-400 text-sm mt-1">
-        Browse upcoming events and their contacts.
+      <h1 className="text-center text-lg font-medium text-zinc-200 mt-2">Conventions</h1>
+      <p className="text-center ext-zinc-400 text-sm mt-1">
+        Browse Expos, Conventions, and Atendees.
       </p>
       <ul className="mt-6 space-y-3">
         {list.length === 0 ? (
@@ -83,18 +83,18 @@ export default function ConventionsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{c.name}</div>
                   {c.dates && (
-                    <div className="text-zinc-400 text-sm flex items-center gap-1 mt-0.5">
-                      <span>📅</span> {c.dates}
+                    <div className="text-zinc-400 text-sm flex items-center gap-1.5 mt-1.5 justify-end">
+                      {c.dates} <div className="p-0.5 bg-zinc-700/50 rounded"><img src="/icons/calendar.png" alt="" className="w-4 h-4 shrink-0" aria-hidden /></div>
                     </div>
                   )}
                   {c.location && (
-                    <div className="text-zinc-400 text-sm flex items-center gap-1">
-                      <span>📍</span> {c.location}
+                    <div className="text-zinc-400 text-sm flex items-center gap-1.5 mt-1.5 justify-end">
+                      {c.location} <div className="p-0.5 bg-zinc-700/50 rounded"><img src="/icons/location.png" alt="" className="w-4 h-4 shrink-0" aria-hidden /></div>
                     </div>
                   )}
                   {c.attendeeCount != null && (
-                    <div className="text-zinc-400 text-sm flex items-center gap-1">
-                      <span>👥</span> {c.attendeeCount.toLocaleString()} attendees
+                    <div className="text-zinc-400 text-sm flex items-center gap-1.5 mt-1.5 justify-end">
+                      {c.attendeeCount.toLocaleString()} attendees <div className="p-0.5 bg-zinc-700/50 rounded"><img src="/icons/list.png" alt="" className="w-4 h-4 shrink-0" aria-hidden /></div>
                     </div>
                   )}
                 </div>

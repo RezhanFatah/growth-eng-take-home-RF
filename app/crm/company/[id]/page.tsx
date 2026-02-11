@@ -93,7 +93,7 @@ export default function CRMCompanyPage() {
           {name.slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-xl font-bold">{name}</h1>
+          <h1 className="text-center text-lg font-medium text-zinc-200">{name}</h1>
           {company.properties.lifecyclestage && (
             <p className="text-zinc-400 text-sm">{company.properties.lifecyclestage}</p>
           )}
@@ -109,7 +109,7 @@ export default function CRMCompanyPage() {
       </div>
       {contacts.length > 0 && (
         <div className="mt-4 rounded-xl bg-zinc-800/80 border border-zinc-700/50 p-4">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+          <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
             Contacts we've spoken to ({contacts.length})
           </h2>
           <ul className="space-y-2">
@@ -144,10 +144,24 @@ export default function CRMCompanyPage() {
 }
 
 function Row({ label, value }: { label: string; value?: string }) {
+  const isWebsite = label === "Website" || label === "Domain";
+  const url = value && isWebsite ? (value.startsWith("http") ? value : `https://${value}`) : null;
+
   return (
     <div className="flex gap-2">
       <span className="text-zinc-500 shrink-0">{label}:</span>
-      <span className="break-words">{value ?? "—"}</span>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="break-words text-orange-500 hover:underline"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="break-words">{value ?? "—"}</span>
+      )}
     </div>
   );
 }

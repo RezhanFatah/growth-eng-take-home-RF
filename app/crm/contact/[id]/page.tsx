@@ -84,7 +84,7 @@ export default function CRMContactPage() {
           {name.slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-xl font-bold">{name}</h1>
+          <h1 className="text-center text-lg font-medium text-zinc-200">{name}</h1>
           {contact.properties.jobtitle && (
             <p className="text-zinc-400 text-sm">{contact.properties.jobtitle}</p>
           )}
@@ -108,10 +108,29 @@ export default function CRMContactPage() {
 }
 
 function Row({ label, value }: { label: string; value?: string }) {
+  const isEmail = label === "Email" && value;
+  const isPhone = label === "Phone" && value;
+
   return (
     <div className="flex gap-2">
       <span className="text-zinc-500 shrink-0">{label}:</span>
-      <span className="break-words">{value ?? "—"}</span>
+      {isEmail ? (
+        <a
+          href={`mailto:${value}`}
+          className="break-words text-orange-500 hover:underline"
+        >
+          {value}
+        </a>
+      ) : isPhone ? (
+        <a
+          href={`tel:${value}`}
+          className="break-words text-orange-500 hover:underline"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="break-words">{value ?? "—"}</span>
+      )}
     </div>
   );
 }

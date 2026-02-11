@@ -4,15 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/conventions", label: "Conventions", icon: "📋" },
-  { href: "/crm", label: "CRM", icon: "👥" },
-  { href: "/chat", label: "Chat", icon: "💬" },
+  { href: "/conventions", label: "Conventions", icon: "/icons/list.png" },
+  { href: "/crm", label: "CRM", icon: "/icons/crm.png" },
+  { href: "/chat", label: "Chat", icon: "/icons/chat.png" },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 md:left-1/2 md:right-auto md:-translate-x-1/2 md:max-w-[480px] bg-[var(--card)] border-t border-white/10 flex justify-around py-2 safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[var(--card)] border-t border-white/10 flex justify-around py-2 safe-area-pb">
       {navItems.map(({ href, label, icon }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
         return (
@@ -23,7 +23,7 @@ export function BottomNav() {
               active ? "text-orange-500" : "text-zinc-400"
             }`}
           >
-            <span className="text-lg" aria-hidden>{icon}</span>
+            <img src={icon} alt="" className="w-6 h-6 object-contain" aria-hidden />
             <span className="text-xs font-medium">{label}</span>
           </Link>
         );

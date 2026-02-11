@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { SwipeableRecentRow } from "@/components/SwipeableRecentRow";
 
 const RECENT_KEY = "chat-recent";
 const RECENT_MAX = 10;
@@ -46,7 +47,15 @@ function addRecent(item: Omit<RecentItem, "date">) {
   ].slice(0, RECENT_MAX);
   try {
     localStorage.setItem(RECENT_KEY, JSON.stringify(list));
-  } catch {}
+  } catch { }
+}
+
+function removeRecent(id: string, type: RecentItem["type"]) {
+  const list = getRecent().filter((r) => !(r.id === id && r.type === type));
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+  } catch { }
+  return list;
 }
 
 export default function ChatPage() {
@@ -93,8 +102,8 @@ export default function ChatPage() {
 
   return (
     <main className="p-4 min-h-screen">
-      <h1 className="text-xl font-bold mt-2">Chat</h1>
-      <p className="text-zinc-400 text-sm mt-1">
+      <h1 className="text-center text-lg font-medium text-zinc-200 mt-2">Chat</h1>
+      <p className="text-center text-zinc-400 text-sm mt-1">
         Search a contact or company to start a conversation.
       </p>
       <div className="mt-4">
@@ -103,7 +112,7 @@ export default function ChatPage() {
           placeholder="Search name, company, or location..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full bg-zinc-900/50 border-0 rounded-full px-5 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700"
         />
       </div>
 
@@ -113,7 +122,7 @@ export default function ChatPage() {
         <div className="mt-4 space-y-4">
           {results.companies.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
                 CRM Companies
               </h2>
               <ul className="space-y-2">
@@ -140,7 +149,7 @@ export default function ChatPage() {
           )}
           {results.contacts.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
                 CRM Contacts
               </h2>
               <ul className="space-y-2">
@@ -167,7 +176,7 @@ export default function ChatPage() {
           )}
           {results.directory.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
                 Directory
               </h2>
               <ul className="space-y-2">
@@ -196,13 +205,7 @@ export default function ChatPage() {
           )}
           {!hasResults && query.trim() && (
             <div className="text-center py-6">
-              <p className="text-zinc-500 mb-3">No results in directory or CRM.</p>
-              <Link
-                href={`/chat/web-search?q=${encodeURIComponent(query)}`}
-                className="inline-block bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600"
-              >
-                Search the web for “{query}”
-              </Link>
+              <p className="text-zinc-500">No results in directory or CRM.</p>
             </div>
           )}
         </div>
@@ -210,29 +213,17 @@ export default function ChatPage() {
 
       {recent.length > 0 && !results && (
         <section className="mt-6">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
             Recent conversations
           </h2>
           <ul className="space-y-2">
             {recent.map((r) => (
-              <li key={`${r.type}-${r.id}`}>
-                <Link
-                  href={`/chat/thread?type=${r.type}&id=${encodeURIComponent(r.id)}`}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800"
-                >
-                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
-                    {r.name.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{r.name}</div>
-                    <div className="text-zinc-400 text-sm truncate">{r.snippet}</div>
-                  </div>
-                  <span className="text-zinc-500 text-xs shrink-0">
-                    {new Date(r.date).toLocaleDateString()}
-                  </span>
-                  <span className="text-zinc-500">›</span>
-                </Link>
-              </li>
+              <SwipeableRecentRow
+                key={`${r.type}-${r.id}`}
+                item={r}
+                href={`/chat/thread?type=${r.type}&id=${encodeURIComponent(r.id)}`}
+                onDelete={() => setRecent(removeRecent(r.id, r.type))}
+              />
             ))}
           </ul>
         </section>

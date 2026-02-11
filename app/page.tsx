@@ -3,8 +3,8 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6">
-      <h1 className="text-2xl font-bold mb-2">Trade Show Prospecting</h1>
-      <p className="text-zinc-400 mb-6 text-center">
+      <h1 className="text-center text-lg font-medium text-zinc-200 mb-2">Trade Show Prospecting</h1>
+      <p className="text-center text-zinc-400 mb-6 text-center">
         Get context on companies and contacts at conventions.
       </p>
       <div className="flex flex-col gap-3 w-full max-w-xs">

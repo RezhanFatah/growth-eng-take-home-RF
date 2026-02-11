@@ -64,7 +64,7 @@ export default function DirectoryContactPage() {
           {displayName.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-xl font-bold">{displayName}</h1>
+          <h1 className="text-center text-lg font-medium text-zinc-200">{displayName}</h1>
           {entry.personTitle && (
             <p className="text-zinc-400 text-sm">{entry.personTitle}</p>
           )}
@@ -91,7 +91,7 @@ export default function DirectoryContactPage() {
       </div>
       {Object.keys(entry.raw).length > 0 && (
         <div className="mt-4 rounded-xl bg-zinc-800/80 border border-zinc-700/50 p-4">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+          <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
             All fields
           </h2>
           <dl className="space-y-1 text-sm">
@@ -111,10 +111,43 @@ export default function DirectoryContactPage() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const isWebsite = label === "Website";
+  const isEmail = label === "Email";
+  const isPhone = label === "Phone";
+
+  const url = value && isWebsite ? (value.startsWith("http") ? value : `https://${value}`) : null;
+  const mailto = value && isEmail ? `mailto:${value}` : null;
+  const tel = value && isPhone ? `tel:${value}` : null;
+
   return (
     <div className="flex gap-2">
       <span className="text-zinc-500 shrink-0">{label}:</span>
-      <span className="break-words">{value || "—"}</span>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="break-words text-orange-500 hover:underline"
+        >
+          {value}
+        </a>
+      ) : mailto ? (
+        <a
+          href={mailto}
+          className="break-words text-orange-500 hover:underline"
+        >
+          {value}
+        </a>
+      ) : tel ? (
+        <a
+          href={tel}
+          className="break-words text-orange-500 hover:underline"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="break-words">{value || "—"}</span>
+      )}
     </div>
   );
 }
