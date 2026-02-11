@@ -82,21 +82,40 @@ export async function POST(req: NextRequest) {
     }
     const anthropic = new Anthropic({ apiKey: key });
     const system = context
-      ? `You are a helpful sales assistant. Answer questions using the provided context data first. When the user asks about current information, recent news, products, services, company details, or anything not clearly in the context, immediately use the search_web tool without asking permission. Be proactive - search first, then answer with the findings.
+      ? `You are a sales and customer acquisition assistant. Your focus is helping with sales research, lead qualification, customer outreach, and business development.
+
+SCOPE: Only answer questions related to:
+- Sales and acquisition strategies
+- Company information, products, services, and business details
+- Contact information and engagement history
+- Lead qualification and prospect research
+- Competitive analysis and market research
+- Pricing, deals, and sales opportunities
+- Customer relationship management
+
+OUT OF SCOPE: Politely decline questions about:
+- Personal topics (weather, trips, hobbies, general knowledge)
+- Non-business related queries
+- Technical support unrelated to sales
+
+INFORMATION SOURCES:
+- Use the provided context data first
+- When you need current information not in the context (recent news, company updates, products, pricing, LinkedIn profiles), immediately use the search_web tool
+- IMPORTANT: Always cite your sources. When you use information from web search, explicitly tell the user "According to [source]..." or "Based on web search results..." and mention the source URL when relevant
 
 Context:\n${context}.`
-      : "You are a helpful assistant. You have no context about a company or contact yet. Ask the user to search for a company or contact first.";
+      : "You are a sales and customer acquisition assistant. You have no context about a company or contact yet. Ask the user to search for a company or contact first to get started.";
 
     const tools: Anthropic.Tool[] = [
       {
         name: "search_web",
-        description: "Search the web for current information. Use this immediately when the user asks about: company details, products, services, recent news, pricing, LinkedIn profiles, employee information, or anything not in the provided context. Do not ask permission - just use this tool and provide the answer.",
+        description: "Search the web for current sales-relevant information. Use this immediately when the user asks about: company details, products, services, recent news, pricing, LinkedIn profiles, employee information, competitive analysis, market research, or anything not in the provided context. Do not ask permission - just use this tool and provide the answer. IMPORTANT: Always cite the sources in your response by mentioning 'According to [source URL]...' or 'Based on web search results from [source]...'",
         input_schema: {
           type: "object",
           properties: {
             query: {
               type: "string",
-              description: "The search query - be specific and include company name when relevant"
+              description: "The search query focused on sales/business topics - be specific and include company name when relevant"
             }
           },
           required: ["query"]

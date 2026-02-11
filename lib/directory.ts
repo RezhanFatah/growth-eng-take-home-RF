@@ -14,8 +14,17 @@ export type DirectoryEntry = {
   score?: number;
   tier?: string;
   fitReasons?: string;
+  /** Numeric revenue for sorting (parsed from Revenue column) */
+  revenueNum?: number;
   raw: Record<string, string>;
 };
+
+function parseRevenue(value: string | undefined): number | undefined {
+  if (!value || typeof value !== "string") return undefined;
+  const cleaned = value.replace(/[$,\s]/g, "");
+  const num = parseFloat(cleaned);
+  return Number.isNaN(num) ? undefined : num;
+}
 
 /** WoC-style: Company, Website, Platform, Revenue, Industry, Score, Tier, Fit Reasons, Concerns */
 function parseTargetList(csvRows: Record<string, string>[]): DirectoryEntry[] {
@@ -31,6 +40,7 @@ function parseTargetList(csvRows: Record<string, string>[]): DirectoryEntry[] {
       score: row["Score"] ? parseInt(row["Score"], 10) : undefined,
       tier: row["Tier"],
       fitReasons: row["Fit Reasons"],
+      revenueNum: parseRevenue(row["Revenue"]),
       raw: row,
     };
   });
@@ -41,7 +51,7 @@ function parseAttendeeList(csvRows: Record<string, string>[]): DirectoryEntry[] 
   return csvRows.map((row, i) => {
     const first = row["First Name"] ?? "";
     const last = row["Last Name"] ?? "";
-    const company = row["Company"] ?? "";
+    const company = row["Company"] ?? row["Company Name"] ?? row["Organization"] ?? "";
     const url = row["Company URL"] ?? row["Website"] ?? "";
     return {
       id: `attendee-${i}-${first}-${last}-${company}`,
@@ -51,6 +61,7 @@ function parseAttendeeList(csvRows: Record<string, string>[]): DirectoryEntry[] 
       personName: [first, last].filter(Boolean).join(" ").trim() || undefined,
       personTitle: row["Job Title"] ?? row["Title"] ?? undefined,
       location: row["Country"] ?? row["Regions"] ?? undefined,
+      revenueNum: parseRevenue(row["Revenue"]),
       raw: row,
     };
   });

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid";
+import EngagementsSection from "@/components/EngagementsSection";
 
 type Company = {
   id: string;
@@ -111,13 +112,13 @@ export default function CRMCompanyPage() {
       {contacts.length > 0 && (
         <div className="mt-4 rounded-xl bg-zinc-800/80 border border-zinc-700/50 p-4">
           <h2 className="text-center text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
-            Contacts we've spoken to ({contacts.length})
+            Contacts we&apos;ve spoken to ({contacts.length})
           </h2>
           <ul className="space-y-2">
             {contacts.map((c) => (
               <li key={c.id}>
                 <Link
-                  href={`/crm/contact/${c.id}`}
+                  href={`/crm/contact/${c.id}?companyId=${id}`}
                   className="block p-2 rounded-lg hover:bg-zinc-700/50"
                 >
                   <span className="font-medium">
@@ -132,6 +133,10 @@ export default function CRMCompanyPage() {
           </ul>
         </div>
       )}
+      <EngagementsSection
+        engagementsUrl={`/api/hubspot/companies/${id}/engagements`}
+        title="Recent activity"
+      />
       <div className="mt-4">
         <Link
           href="/conventions"

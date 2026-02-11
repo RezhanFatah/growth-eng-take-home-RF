@@ -2,7 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanityClient } from "@/lib/sanity";
 import { conventionBySlugQuery } from "@/lib/sanity";
 import { parseCsvToEntries, buildDirectoryIndex } from "@/lib/directory";
-import { buildContextFromDirectory, buildContextFromHubSpotCompany, buildContextFromHubSpotContact } from "@/lib/chat-context";
+import {
+  buildContextFromDirectory,
+  buildContextFromHubSpotCompany,
+  buildContextFromHubSpotContact,
+  buildContextFromEngagements,
+} from "@/lib/chat-context";
+import {
+  getCachedEngagements,
+  setCachedEngagements,
+  engagementCacheKey,
+} from "@/lib/engagement-cache";
+import { ENGAGEMENTS_LIMIT } from "@/lib/engagement-config";
+import { fetchEngagementsForContact, fetchEngagementsForCompany } from "@/lib/hubspot-engagements";
+import { generateEngagementSummaries } from "@/lib/engagement-summary";
 
 const HUBSPOT_BASE = "https://api.hubapi.com";
 
@@ -42,7 +55,38 @@ export async function GET(req: NextRequest) {
         if (cr.ok) contacts.push((await cr.json()).properties ?? {});
       }
       const name = company.properties?.name ?? "Company";
-      const context = buildContextFromHubSpotCompany(company, contacts);
+      let context = buildContextFromHubSpotCompany(company, contacts);
+      const companyCacheKey = engagementCacheKey("company", id);
+      let companyCached = getCachedEngagements(companyCacheKey);
+      if (!companyCached) {
+        try {
+          const engagements = await fetchEngagementsForCompany(token, id, ENGAGEMENTS_LIMIT);
+          if (engagements.length > 0 && process.env.ANTHROPIC_API_KEY) {
+            const summaryResult = await generateEngagementSummaries(
+              engagements,
+              process.env.ANTHROPIC_API_KEY
+            );
+            if (summaryResult) {
+              companyCached = {
+                engagements,
+                displaySummaries: summaryResult.displaySummaries,
+                contextSummary: summaryResult.contextSummary,
+                fetchedAt: Date.now(),
+              };
+              setCachedEngagements(companyCacheKey, {
+                engagements,
+                displaySummaries: summaryResult.displaySummaries,
+                contextSummary: summaryResult.contextSummary,
+              });
+            }
+          }
+        } catch {
+          // non-blocking: continue without engagement context
+        }
+      }
+      if (companyCached?.contextSummary) {
+        context += buildContextFromEngagements(companyCached.contextSummary);
+      }
       return NextResponse.json({ name, context });
     }
 
@@ -55,7 +99,38 @@ export async function GET(req: NextRequest) {
       if (!res.ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
       const contact = await res.json();
       const name = [contact.properties?.firstname, contact.properties?.lastname].filter(Boolean).join(" ") || "Contact";
-      const context = buildContextFromHubSpotContact(contact);
+      let context = buildContextFromHubSpotContact(contact);
+      const contactCacheKey = engagementCacheKey("contact", id);
+      let contactCached = getCachedEngagements(contactCacheKey);
+      if (!contactCached) {
+        try {
+          const engagements = await fetchEngagementsForContact(token, id, ENGAGEMENTS_LIMIT);
+          if (engagements.length > 0 && process.env.ANTHROPIC_API_KEY) {
+            const summaryResult = await generateEngagementSummaries(
+              engagements,
+              process.env.ANTHROPIC_API_KEY
+            );
+            if (summaryResult) {
+              contactCached = {
+                engagements,
+                displaySummaries: summaryResult.displaySummaries,
+                contextSummary: summaryResult.contextSummary,
+                fetchedAt: Date.now(),
+              };
+              setCachedEngagements(contactCacheKey, {
+                engagements,
+                displaySummaries: summaryResult.displaySummaries,
+                contextSummary: summaryResult.contextSummary,
+              });
+            }
+          }
+        } catch {
+          // non-blocking: continue without engagement context
+        }
+      }
+      if (contactCached?.contextSummary) {
+        context += buildContextFromEngagements(contactCached.contextSummary);
+      }
       return NextResponse.json({ name, context });
     }
 

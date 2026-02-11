@@ -29,7 +29,11 @@ export default function NewNotePage() {
   }, [rawText]);
 
   const handleProcess = async () => {
-    if (!rawText.trim() || processing) return;
+    console.log("handleProcess called, rawText:", rawText.trim(), "processing:", processing);
+    if (!rawText.trim() || processing) {
+      console.log("handleProcess aborted");
+      return;
+    }
 
     setProcessing(true);
     setError(null);
@@ -37,6 +41,7 @@ export default function NewNotePage() {
     const noteId = crypto.randomUUID();
 
     try {
+      console.log("Sending request to /api/notes/process");
       const response = await fetch("/api/notes/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,8 +54,10 @@ export default function NewNotePage() {
       }
 
       const data = await response.json();
+      console.log("Received structured data:", data);
       setStructured(data.structured);
     } catch (err) {
+      console.error("handleProcess error:", err);
       setError(err instanceof Error ? err.message : "Failed to process note");
     } finally {
       setProcessing(false);
@@ -58,7 +65,11 @@ export default function NewNotePage() {
   };
 
   const handleQuickSave = () => {
-    if (!rawText.trim()) return;
+    console.log("handleQuickSave called, rawText:", rawText.trim());
+    if (!rawText.trim()) {
+      console.log("handleQuickSave aborted: empty text");
+      return;
+    }
 
     const note: Note = {
       id: crypto.randomUUID(),
@@ -68,7 +79,9 @@ export default function NewNotePage() {
       // No structured field - saves as raw note only
     };
 
+    console.log("Saving note:", note);
     const success = saveNote(note);
+    console.log("Save result:", success);
     if (success) {
       router.push("/notes");
     } else {
@@ -133,17 +146,37 @@ export default function NewNotePage() {
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={handleQuickSave}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("Save Note button clicked");
+                  handleQuickSave();
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  console.log("Save Note button touched");
+                  handleQuickSave();
+                }}
                 disabled={!rawText.trim()}
-                className="flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+                className="flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 touch-manipulation"
               >
                 Save Note
               </button>
               <button
                 type="button"
-                onClick={handleProcess}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("AI Structure Note button clicked");
+                  handleProcess();
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  console.log("AI Structure Note button touched");
+                  handleProcess();
+                }}
                 disabled={!canProcess}
-                className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+                className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 touch-manipulation"
               >
                 <SparklesIcon className="w-5 h-5" />
                 {processing ? "Processing..." : "AI Structure Note"}

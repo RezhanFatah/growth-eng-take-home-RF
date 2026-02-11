@@ -61,3 +61,8 @@ export function buildContextFromHubSpotContact(contact: {
     `Company: ${p.company ?? "—"}`,
   ].join("\n");
 }
+
+export function buildContextFromEngagements(contextSummary: string): string {
+  if (!contextSummary?.trim()) return "";
+  return "\n\nEngagement history (summary):\n" + contextSummary.trim();
+}

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const HUBSPOT_BASE = "https://api.hubapi.com";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const token = process.env.HUBSPOT_ACCESS_TOKEN;
@@ -17,6 +17,11 @@ export async function GET(
   if (!contactId) {
     return NextResponse.json({ error: "Missing contact id" }, { status: 400 });
   }
+
+  // Check if associations are requested
+  const searchParams = req.nextUrl.searchParams;
+  const includeAssociations = searchParams.get("associations");
+
   try {
     const res = await fetch(
       `${HUBSPOT_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,jobtitle,phone,company`,
@@ -32,6 +37,26 @@ export async function GET(
       );
     }
     const data = await res.json();
+
+    // Fetch company associations if requested
+    if (includeAssociations === "companies") {
+      try {
+        const assocRes = await fetch(
+          `${HUBSPOT_BASE}/crm/v4/objects/contacts/${contactId}/associations/companies`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (assocRes.ok) {
+          const assocData = await assocRes.json();
+          data.associations = {
+            companies: assocData,
+          };
+        }
+      } catch (e) {
+        console.error("Failed to fetch company associations:", e);
+        // Continue without associations
+      }
+    }
+
     return NextResponse.json(data);
   } catch (e) {
     console.error("HubSpot contact detail error:", e);

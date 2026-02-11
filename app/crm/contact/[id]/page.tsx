@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid";
-
-const HUBSPOT_BASE = "https://api.hubapi.com";
+import EngagementsSection from "@/components/EngagementsSection";
 
 type Contact = {
   id: string;
@@ -17,17 +16,24 @@ type Contact = {
     phone?: string;
     company?: string;
   };
+  associations?: {
+    companies?: {
+      results?: Array<{ toObjectId: string }>;
+    };
+  };
 };
 
 export default function CRMContactPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const companyId = searchParams.get("companyId"); // Check if coming from a company page
   const [contact, setContact] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/hubspot/contacts/${id}`)
+    fetch(`/api/hubspot/contacts/${id}?associations=companies`)
       .then((r) => {
         if (r.status === 404) throw new Error("not_found");
         if (!r.ok) throw new Error("Failed to load");
@@ -75,10 +81,22 @@ export default function CRMContactPage() {
     .filter(Boolean)
     .join(" ") || "—";
 
+  // Determine the back link - prioritize companyId from URL, then from contact associations
+  const primaryCompanyId = companyId || contact.associations?.companies?.results?.[0]?.toObjectId;
+
+  console.log("Debug back button:", {
+    companyIdFromUrl: companyId,
+    associations: contact.associations,
+    primaryCompanyId,
+  });
+
+  const backHref = primaryCompanyId ? `/crm/company/${primaryCompanyId}` : "/crm";
+  const backText = primaryCompanyId ? "← Back to Company" : "← Back to CRM";
+
   return (
     <main className="p-4 pb-20 relative">
-      <Link href="/crm" className="text-orange-500 hover:underline text-sm inline-block mb-4">
-        ← Back to CRM
+      <Link href={backHref} className="text-orange-500 hover:underline text-sm inline-block mb-4">
+        {backText}
       </Link>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-14 h-14 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-xl font-bold">
@@ -96,6 +114,10 @@ export default function CRMContactPage() {
         <Row label="Phone" value={contact.properties.phone} />
         <Row label="Company" value={contact.properties.company} />
       </div>
+      <EngagementsSection
+        engagementsUrl={`/api/hubspot/contacts/${id}/engagements`}
+        title="Recent activity"
+      />
       <div className="mt-4">
         <Link
           href="/conventions"
