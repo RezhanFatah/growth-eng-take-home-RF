@@ -33,3 +33,8 @@ Thumbs.db
 
 # Sanity
 studio/dist
+studio/.sanity/
+
+# Planning / editor (optional – uncomment to avoid committing)
+# trade_show_prospecting_app_10cc860b.plan.md
+# .claude/

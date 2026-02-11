@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from "react";
 import Link from "next/link";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { ChevronRightIcon, BuildingOfficeIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
 
 type CompanyResult = {
   id: string;
@@ -89,10 +91,10 @@ export default function CRMPage() {
         <button
           type="button"
           onClick={search}
-          className="bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 transition-colors shrink-0"
+          className="bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 transition-all active:scale-95 shrink-0 shadow-lg shadow-orange-500/20"
           aria-label="Search"
         >
-          <img src="/icons/send.svg" alt="" className="w-5 h-5" aria-hidden />
+          <MagnifyingGlassIcon className="w-5 h-5" />
         </button>
       </div>
       {error && (
@@ -122,11 +124,13 @@ export default function CRMPage() {
                         <div className="font-medium truncate">
                           {c.properties.name ?? "—"}
                         </div>
-                        <div className="text-zinc-400 text-sm truncate">
-                          {c.properties.domain ?? c.properties.industry ?? ""}
-                        </div>
+                        {(c.properties.domain || c.properties.industry) && (
+                          <div className="text-zinc-400 text-xs truncate mt-1">
+                            {c.properties.domain ?? c.properties.industry}
+                          </div>
+                        )}
                       </div>
-                      <span className="text-zinc-500">›</span>
+                      <ChevronRightIcon className="w-5 h-5 text-zinc-600 shrink-0" />
                     </Link>
                   </li>
                 ))}
@@ -160,12 +164,20 @@ export default function CRMPage() {
                             .filter(Boolean)
                             .join(" ") || "—"}
                         </div>
-                        <div className="text-zinc-400 text-sm truncate">
-                          {c.properties.jobtitle ?? ""}
-                          {c.properties.company ? ` · ${c.properties.company}` : ""}
-                        </div>
+                        {c.properties.jobtitle && (
+                          <div className="text-zinc-400 text-xs flex items-center gap-1.5 mt-1">
+                            <BriefcaseIcon className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
+                            <span className="truncate">{c.properties.jobtitle}</span>
+                          </div>
+                        )}
+                        {c.properties.company && (
+                          <div className="text-zinc-400 text-xs flex items-center gap-1.5 mt-1">
+                            <BuildingOfficeIcon className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
+                            <span className="truncate">{c.properties.company}</span>
+                          </div>
+                        )}
                       </div>
-                      <span className="text-zinc-500">›</span>
+                      <ChevronRightIcon className="w-5 h-5 text-zinc-600 shrink-0" />
                     </Link>
                   </li>
                 ))}

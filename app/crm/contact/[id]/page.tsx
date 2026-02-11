@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid";
 
 const HUBSPOT_BASE = "https://api.hubapi.com";
 
@@ -75,7 +76,7 @@ export default function CRMContactPage() {
     .join(" ") || "—";
 
   return (
-    <main className="p-4 pb-20">
+    <main className="p-4 pb-20 relative">
       <Link href="/crm" className="text-orange-500 hover:underline text-sm inline-block mb-4">
         ← Back to CRM
       </Link>
@@ -103,6 +104,15 @@ export default function CRMContactPage() {
           Check directory →
         </Link>
       </div>
+
+      {/* Floating AI Chat Button */}
+      <Link
+        href={`/chat/thread?type=contact&id=${id}`}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 hover:bg-orange-600 hover:scale-110 transition-all active:scale-95 z-10"
+        aria-label="Ask AI about this contact"
+      >
+        <ChatBubbleLeftRightIcon className="w-6 h-6" />
+      </Link>
     </main>
   );
 }

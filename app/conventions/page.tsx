@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CalendarIcon, MapPinIcon, UsersIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 type Convention = {
   _id: string;
@@ -83,22 +84,25 @@ export default function ConventionsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{c.name}</div>
                   {c.dates && (
-                    <div className="text-zinc-400 text-sm flex items-center gap-1.5 mt-1.5 justify-end">
-                      {c.dates} <div className="p-0.5 bg-zinc-700/50 rounded"><img src="/icons/calendar.png" alt="" className="w-4 h-4 shrink-0" aria-hidden /></div>
+                    <div className="text-zinc-400 text-xs flex items-center gap-1.5 mt-2 justify-end">
+                      <span className="truncate">{c.dates}</span>
+                      <CalendarIcon className="w-4 h-4 shrink-0 text-zinc-500" />
                     </div>
                   )}
                   {c.location && (
-                    <div className="text-zinc-400 text-sm flex items-center gap-1.5 mt-1.5 justify-end">
-                      {c.location} <div className="p-0.5 bg-zinc-700/50 rounded"><img src="/icons/location.png" alt="" className="w-4 h-4 shrink-0" aria-hidden /></div>
+                    <div className="text-zinc-400 text-xs flex items-center gap-1.5 mt-1.5 justify-end">
+                      <span className="truncate">{c.location}</span>
+                      <MapPinIcon className="w-4 h-4 shrink-0 text-zinc-500" />
                     </div>
                   )}
                   {c.attendeeCount != null && (
-                    <div className="text-zinc-400 text-sm flex items-center gap-1.5 mt-1.5 justify-end">
-                      {c.attendeeCount.toLocaleString()} attendees <div className="p-0.5 bg-zinc-700/50 rounded"><img src="/icons/list.png" alt="" className="w-4 h-4 shrink-0" aria-hidden /></div>
+                    <div className="text-zinc-400 text-xs flex items-center gap-1.5 mt-1.5 justify-end">
+                      <span>{c.attendeeCount.toLocaleString()} attendees</span>
+                      <UsersIcon className="w-4 h-4 shrink-0 text-zinc-500" />
                     </div>
                   )}
                 </div>
-                <span className="text-zinc-500">›</span>
+                <ChevronRightIcon className="w-5 h-5 text-zinc-600 shrink-0" />
               </Link>
             </li>
           ))

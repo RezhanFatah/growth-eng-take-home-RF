@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid";
 
 type Convention = { name: string; slug: string; dates?: string; location?: string };
 type DirectoryEntry = {
@@ -52,7 +53,7 @@ export default function DirectoryContactPage() {
   const displayName = entry.personName || entry.companyName;
 
   return (
-    <main className="p-4 min-h-screen pb-20">
+    <main className="p-4 min-h-screen pb-20 relative">
       <Link
         href={`/conventions/${slug}`}
         className="text-orange-500 hover:underline text-sm inline-block mb-4"
@@ -106,6 +107,15 @@ export default function DirectoryContactPage() {
           </dl>
         </div>
       )}
+
+      {/* Floating AI Chat Button */}
+      <Link
+        href={`/chat/thread?type=directory&id=${encodeURIComponent(id)}&slug=${slug}`}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-orange-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 hover:bg-orange-600 hover:scale-110 transition-all active:scale-95 z-10"
+        aria-label="Ask AI about this contact"
+      >
+        <ChatBubbleLeftRightIcon className="w-6 h-6" />
+      </Link>
     </main>
   );
 }

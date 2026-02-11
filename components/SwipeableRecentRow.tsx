@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { TrashIcon, ChevronRightIcon, BuildingOfficeIcon, UserIcon, MapPinIcon } from "@heroicons/react/24/outline";
 
 const DELETE_WIDTH = 60;
 
@@ -65,10 +66,10 @@ export function SwipeableRecentRow({ item, href, onDelete }: Props) {
       <button
         type="button"
         onClick={handleDelete}
-        className="absolute right-0 top-0 bottom-0 w-[60px] flex items-center justify-center bg-red-600 hover:bg-red-500"
+        className="absolute right-0 top-0 bottom-0 w-[60px] flex items-center justify-center bg-red-600 hover:bg-red-500 transition-colors"
         aria-label="Delete conversation"
       >
-        <img src="/icons/trash.png" alt="" className="w-5 h-5 invert" aria-hidden />
+        <TrashIcon className="w-5 h-5 text-white" />
       </button>
       <div
         style={{ transform: `translateX(${translateX}px)` }}
@@ -79,11 +80,21 @@ export function SwipeableRecentRow({ item, href, onDelete }: Props) {
       >
         <Link
           href={href}
-          className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800 min-w-0"
+          className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800 border border-zinc-700/50 hover:bg-zinc-700 transition-colors min-w-0"
         >
-          <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
-            {item.name.slice(0, 2).toUpperCase()}
-          </div>
+          {item.type === "company" ? (
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+              <BuildingOfficeIcon className="w-5 h-5 text-blue-400" />
+            </div>
+          ) : item.type === "contact" ? (
+            <div className="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center shrink-0">
+              <UserIcon className="w-5 h-5 text-green-400" />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+              <MapPinIcon className="w-5 h-5 text-purple-400" />
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <div className="font-medium truncate">{item.name}</div>
             <div className="text-zinc-400 text-sm truncate">{item.snippet}</div>
@@ -91,7 +102,7 @@ export function SwipeableRecentRow({ item, href, onDelete }: Props) {
           <span className="text-zinc-500 text-xs shrink-0">
             {new Date(item.date).toLocaleDateString()}
           </span>
-          <span className="text-zinc-500">›</span>
+          <ChevronRightIcon className="w-5 h-5 text-zinc-600 shrink-0" />
         </Link>
       </div>
     </li>

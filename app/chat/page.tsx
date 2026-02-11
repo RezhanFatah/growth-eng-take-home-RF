@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { SwipeableRecentRow } from "@/components/SwipeableRecentRow";
+import { BuildingOfficeIcon, UserIcon, MapPinIcon, ChevronRightIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const RECENT_KEY = "chat-recent";
 const RECENT_MAX = 10;
@@ -106,13 +107,14 @@ export default function ChatPage() {
       <p className="text-center text-zinc-400 text-sm mt-1">
         Search a contact or company to start a conversation.
       </p>
-      <div className="mt-4">
+      <div className="mt-4 relative">
+        <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
         <input
-          type="search"
+          type="text"
           placeholder="Search name, company, or location..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full bg-zinc-900/50 border-0 rounded-full px-5 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700"
+          className="w-full bg-zinc-900/50 border-0 rounded-full pl-12 pr-5 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-700 appearance-none"
         />
       </div>
 
@@ -130,17 +132,19 @@ export default function ChatPage() {
                   <li key={`company-${c.id}`}>
                     <Link
                       href={`/chat/thread?type=company&id=${c.id}`}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800 transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
-                        {c.name.slice(0, 2).toUpperCase()}
+                      <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                        <BuildingOfficeIcon className="w-5 h-5 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{c.name}</div>
-                        <div className="text-zinc-400 text-sm truncate">{c.subtitle}</div>
+                        <div className="text-zinc-400 text-xs truncate mt-0.5">{c.subtitle}</div>
                       </div>
-                      <span className="text-xs text-zinc-500 bg-zinc-700 px-2 py-0.5 rounded">CRM</span>
-                      <span className="text-zinc-500">›</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md font-medium">Company</span>
+                        <ChevronRightIcon className="w-5 h-5 text-zinc-600" />
+                      </div>
                     </Link>
                   </li>
                 ))}
@@ -157,17 +161,19 @@ export default function ChatPage() {
                   <li key={`contact-${c.id}`}>
                     <Link
                       href={`/chat/thread?type=contact&id=${c.id}`}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800 transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
-                        {c.name.slice(0, 2).toUpperCase()}
+                      <div className="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center shrink-0">
+                        <UserIcon className="w-5 h-5 text-green-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{c.name}</div>
-                        <div className="text-zinc-400 text-sm truncate">{c.subtitle}</div>
+                        <div className="text-zinc-400 text-xs truncate mt-0.5">{c.subtitle}</div>
                       </div>
-                      <span className="text-xs text-zinc-500 bg-zinc-700 px-2 py-0.5 rounded">CRM</span>
-                      <span className="text-zinc-500">›</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-md font-medium">Contact</span>
+                        <ChevronRightIcon className="w-5 h-5 text-zinc-600" />
+                      </div>
                     </Link>
                   </li>
                 ))}
@@ -184,19 +190,25 @@ export default function ChatPage() {
                   <li key={`dir-${d.id}`}>
                     <Link
                       href={`/chat/thread?type=directory&id=${encodeURIComponent(d.id)}&slug=${d.conventionSlug ?? ""}`}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/80 border border-zinc-700/50 hover:bg-zinc-800 transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
-                        {d.name.slice(0, 2).toUpperCase()}
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+                        <MapPinIcon className="w-5 h-5 text-purple-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{d.name}</div>
-                        <div className="text-zinc-400 text-sm truncate">{d.subtitle}</div>
+                        <div className="text-zinc-400 text-xs truncate mt-0.5">{d.subtitle}</div>
                       </div>
-                      <span className="text-xs text-zinc-500 bg-zinc-700 px-2 py-0.5 rounded">
-                        {d.source === "target" ? "Exhibitor" : "Attendee"}
-                      </span>
-                      <span className="text-zinc-500">›</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${
+                          d.source === "target"
+                            ? "text-purple-400 bg-purple-500/10 border border-purple-500/20"
+                            : "text-amber-400 bg-amber-500/10 border border-amber-500/20"
+                        }`}>
+                          {d.source === "target" ? "Exhibitor" : "Attendee"}
+                        </span>
+                        <ChevronRightIcon className="w-5 h-5 text-zinc-600" />
+                      </div>
                     </Link>
                   </li>
                 ))}
